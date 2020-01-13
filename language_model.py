@@ -1,3 +1,5 @@
+#python 3.7
+
 import pandas as pd
 import fastai
 import re
@@ -30,7 +32,9 @@ def lm_learner(data, model = None, drop_mult = 0.3):
 
 def tune_learning_rate(learner):
     '''this function plots the learning rate vs. loss and saves the graph'''
+    #find the best learning rate
     learner.lr_find()
+    #plot the learning rate graph vs. loss
     fig = learner.recorder.plot(return_fig = True, skip_end = 15)
     #saving the learning rate chart as learning_rate_graph.png
     fig.savefig(learning_rate_fig_path + 'learning_rate_graph.png')
@@ -39,10 +43,12 @@ def tune_learning_rate(learner):
 
 def model_training(learner, export_file = None, num_of_epochs = 3, moms=(0.8,0.7)):
     '''this function trains the model and export the learner and weights'''
+    #input the learning rate range based on the outputted learning_rate_graph
     refined_learning_rate = input('please input the selected learning rate min and max, separated by comma, i.e. 3e-5,3e-4: ')
     learning_rate_min, learning_rate_max = [float(x) for x in refined_learning_rate.split(',')]
+    #train the model with fastai's fit_one_cycle
     learner.fit_one_cycle(num_of_epochs, max_lr=slice(learning_rate_min, learning_rate_max), moms = moms)
-    # learner.save('trained_model', return_path = True)
+    #export everything with learner and model weights, do not use learner.save() as we are also trying to save the learner as well
     learner.export(file = export_file)
     return learner
 
@@ -50,13 +56,13 @@ def model_training(learner, export_file = None, num_of_epochs = 3, moms=(0.8,0.7
 def main(dataset = None):
     '''this function wraps everything together'''
     prepared_data = data_preparation(data_path, dataset, cols = 'Tweet')
+    #use the AWD_LSTM: Wikitext 103 pre-trained model for transfer learning
     language_learner = lm_learner(prepared_data, model = AWD_LSTM)
     tune_learning_rate(language_learner)
     trained_model = model_training(language_learner, export_file = model_path + 'trained_{}_lm.pkl'.format(re.sub('data_|.csv', '', dataset)))
+    #print the model summary 
     print(trained_model.summary())
-    # model_prediction()
-    # model_prediction(language_learner)
-
+   
 
 if __name__ == '__main__':
     main(dataset = 'data_trump.csv')

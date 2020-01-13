@@ -1,3 +1,4 @@
+#python 3.7
 from fastai.text import load_learner
 
 model_path = './models/'
@@ -5,7 +6,7 @@ model_path = './models/'
 def model_prediction(model_file = None, num_of_words = 30):
     '''this function loads the model and predict with a sentence'''
     model = load_learner(model_path, file = model_file)
-    # model = learner.load('trained_model')
+    #predict with sentences of preference
     print(model.predict('Donald Trump', num_of_words, temperature = 0.75))
     print(model.predict('Women', num_of_words, temperature = 0.75))
     print(model.predict('Democrates', num_of_words, temperature = 0.75))
